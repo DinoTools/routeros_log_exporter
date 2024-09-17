@@ -22,4 +22,4 @@ RUN set -ex; \
     rm -rf /dist
 
 ENTRYPOINT ["/usr/local/bin/routeros_log_exporter"]
-CMD ["--config /etc/routeros_log_exporter/config.yaml"]
+CMD ["--config", "/etc/routeros_log_exporter/config.yaml", "-vv"]

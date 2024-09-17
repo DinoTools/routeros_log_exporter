@@ -50,6 +50,13 @@ Requirements
 Installation
 ------------
 
+### Docker
+
+```
+docker pull ghcr.io/dinotools/routeros-log-exporter:main
+docker run --rm -v ./config.yaml:/etc/routeros_log_exporter/config.yaml:ro ghcr.io/dinotools/routeros-log-exporter:main
+```
+
 ### PIP
 
 If you want to use pip we recommend to use as virtualenv to install the dependencies.

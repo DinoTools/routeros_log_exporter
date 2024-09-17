@@ -10,11 +10,12 @@ RUN set -ex; \
     apk add git; \
     cd /build; \
     python -m pip install build --user; \
-    python -m build --wheel --outdir dist/ .
+    python -m build --wheel --outdir dist/ . ; \
+    ls -l dist/
 
 FROM python:3.12-alpine
 
-COPY --from=build /build/dist/*.whl /dist
+COPY --from=build /build/dist/*.whl /dist/
 
 RUN set -ex; \
     python -m pip install /dist/*.whl; \

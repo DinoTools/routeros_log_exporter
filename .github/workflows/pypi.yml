@@ -10,14 +10,18 @@ on:
       - main
     tags:
       - 0.*
-      - 1.*
 
 jobs:
   build-n-publish:
     name: Build and publish Python distributions to PyPI and TestPyPI
     runs-on: ubuntu-latest
+    # Specifying a GitHub environment is optional, but strongly encouraged
+    environment: pypi-release
+    permissions:
+      # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v4
 
       - name: Get history and tags for SCM versioning to work
         run: |
@@ -25,7 +29,7 @@ jobs:
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
@@ -44,7 +48,6 @@ jobs:
           github.ref == 'refs/heads/main'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
           skip-existing: true
 
@@ -53,5 +56,3 @@ jobs:
           github.event_name == 'push' &&
           startsWith(github.ref, 'refs/tags')
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}

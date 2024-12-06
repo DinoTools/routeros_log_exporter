@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
+import signal
 from threading import Thread
 import queue
 from typing import Dict, List, Type
@@ -45,6 +46,14 @@ class Exporter:
         self._dispatcher = Dispatcher()
         load_modules([".output"])
         load_modules([".output.format"])
+
+    def handle_signal(self, signal_number):
+        logger.info(f"Propagating signal {signal_number} ({signal.Signals(signal_number).name})")
+        for fetcher in self._fetchers:
+            fetcher.handle_signal(signal_number)
+
+        for output in self._outputs.values():
+            output.handle_signal(signal_number)
 
     def start(self):
         with open(self._config_filename) as fp:

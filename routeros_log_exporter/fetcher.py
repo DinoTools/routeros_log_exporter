@@ -169,6 +169,9 @@ class LogFetcher(Thread):
         logger.info("Connected")
         return self._api
 
+    def handle_signal(self, signal_number):
+        pass
+
     def run(self):
         while not self._should_terminate:
             try:

@@ -12,9 +12,13 @@ from . import Exporter
 g_exporter: Optional[Exporter] = None
 
 
-def handle_signal(signal_number, frame):
+def handle_global_signal(signal_number, frame):
     g_exporter.stop()
     raise SystemExit('Exiting')
+
+
+def handle_signal(signal_number, frame):
+    g_exporter.handle_signal(signal_number)
 
 
 @click.command()
@@ -46,8 +50,10 @@ def cli(config_filename, verbosity):
         handlers=[log_handler]
     )
 
-    signal.signal(signal.SIGTERM, handle_signal)
-    signal.signal(signal.SIGINT, handle_signal)
+    signal.signal(signal.SIGTERM, handle_global_signal)
+    signal.signal(signal.SIGINT, handle_global_signal)
+
+    signal.signal(signal.SIGHUP, handle_signal)
 
     g_exporter = Exporter(config_filename)
     g_exporter.start()

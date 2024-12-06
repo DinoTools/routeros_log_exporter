@@ -7,6 +7,7 @@ import os.path
 from pprint import pformat
 import queue
 import re
+import signal
 from typing import Any, Dict, List, TextIO
 
 
@@ -52,6 +53,7 @@ class FileOutput(Output):
 
         self._fp_cache: Dict[str, List] = {}
         self._clean_fp_lastrun = datetime.now()
+        self._force_clean_fp = False
 
         self.output_format = output_format
 
@@ -98,6 +100,17 @@ class FileOutput(Output):
         return cached_fp[0]
 
     def _clean_fp(self):
+        if self._force_clean_fp:
+            self._force_clean_fp = False
+            logger.info("File cache forced cleaning started")
+            for filename in list(self._fp_cache.keys()):
+                cached_fp = self._fp_cache[filename]
+                logger.info(f"Closing file {filename} ...")
+                cached_fp[0].close()
+                del self._fp_cache[filename]
+            logger.info("File cache forced cleaning finished")
+            return
+
         now = datetime.now()
         lastrun_ago = now - self._clean_fp_lastrun
         if lastrun_ago.total_seconds() < 600:
@@ -112,6 +125,11 @@ class FileOutput(Output):
                 del self._fp_cache[filename]
         self._clean_fp_lastrun = now
         logger.info("File cache cleaning finished")
+
+    def handle_signal(self, signal_number):
+        logger.info(f"Handling signal {signal_number} ({signal.Signals(signal_number).name})")
+        if signal_number == signal.SIGHUP:
+            self._force_clean_fp = True
 
     def write(self, message: LogMessage):
         filename = self._filename_template

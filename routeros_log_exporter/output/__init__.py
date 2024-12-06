@@ -13,6 +13,9 @@ class Output(Thread):
         super().__init__()
         self._queue: Queue = Queue(maxsize=queue_size)
 
+    def handle_signal(self, signal_number):
+        pass
+
     @property
     def queue(self):
         return self._queue

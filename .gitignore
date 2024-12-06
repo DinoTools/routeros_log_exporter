@@ -4,6 +4,7 @@
 ## RouterOS Log Exporter
 
 /config.yaml
+/logs/
 
 ## MKDocs
 

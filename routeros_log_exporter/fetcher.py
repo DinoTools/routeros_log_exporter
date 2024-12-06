@@ -9,10 +9,10 @@ from typing import Any, Dict, List, Optional, Set
 from queue import Queue
 
 from librouteros import connect
-from librouteros.api import Api as RouterOSApi
 
 from .exception import ConfigError
 from .output import Output
+from .routeros import RouterOSApi
 
 logger = logging.getLogger("fetcher")
 
@@ -40,7 +40,7 @@ class LogFetcher(Thread):
             ssl_verify_hostname: bool = True
     ):
         super().__init__()
-        self._api = None
+        self._api: Optional[RouterOSApi] = None
         self._message_queue = message_queue
 
         self.hostname = hostname
@@ -163,7 +163,8 @@ class LogFetcher(Thread):
             username=self.username,
             password=self.password,
             ssl_wrapper=ssl_ctx.wrap_socket,
-            port=self.port
+            port=self.port,
+            subclass=RouterOSApi,
         )
         logger.info("Connected")
         return self._api

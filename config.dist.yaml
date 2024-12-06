@@ -13,7 +13,7 @@ outputs:
     queue_size: 100
     file_config:
       dir: "./logs"
-      filename: "{hostname}.json"
+      filename: "{{hostname}}-{{timestamp:%Y-%m-%d}}.json"
 
 devices:
   - hostname: 192.168.0.1

@@ -1,11 +1,14 @@
 # SPDX-FileCopyrightText: PhiBo DinoTools (2024)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+from datetime import datetime
 import logging
 import os.path
+from pprint import pformat
 import queue
+import re
 from typing import Any, Dict, List, TextIO
-from datetime import datetime
+
 
 from . import Output
 from .format import Format
@@ -18,10 +21,35 @@ logger = logging.getLogger("output.file")
 class FileOutput(Output):
     name = "file"
 
-    def __init__(self, filename_pattern: str, output_format: Format):
+    def __init__(self, filename_template: str, output_format: Format):
         super().__init__()
 
-        self._filename_pattern: str = filename_pattern
+        self._filename_template: str = filename_template
+        self._filename_patterns: Dict[str, Dict[str, Any]] = {}
+        for m in re.finditer(r"{{(?P<type>[^}:]+)(:(?P<params>[^}]+))?}}", self._filename_template):
+            pattern_type = m.group("type")
+            pattern = m.group(0)
+            pattern_config = {
+                "type": pattern_type,
+            }
+            if pattern_type == "timestamp":
+                pattern_config["format"] = m.group("params")
+            elif pattern_type in ("hostname",):
+                # Patterns without params
+                pass
+            else:
+                logger.warning(
+                    f"Unknown pattern '{pattern_type}' "
+                    f"found in filename template: {self._filename_template}"
+                )
+                continue
+
+            self._filename_patterns[pattern] = pattern_config
+            logger.debug(
+                f"Found pattern '{pattern}' in filename template '{filename_template}'"
+                f" with config {pformat(pattern_config)}"
+            )
+
         self._fp_cache: Dict[str, List] = {}
         self._clean_fp_lastrun = datetime.now()
 
@@ -44,7 +72,7 @@ class FileOutput(Output):
         if not isinstance(raw_log_dir, str):
             raise ConfigError("log_dir not set or not a string")
         log_dir = raw_log_dir
-        filename_pattern = os.path.join(log_dir, filename)
+        filename_template = os.path.join(log_dir, filename)
 
         format_name = config.get("format")
         if not isinstance(format_name, str):
@@ -55,7 +83,7 @@ class FileOutput(Output):
             raise ConfigError(f"Unable to find format with name '{format_name}'")
 
         return cls(
-            filename_pattern=filename_pattern,
+            filename_template=filename_template,
             output_format=format_cls(config=config.get("format_config", {}))
         )
 
@@ -86,11 +114,17 @@ class FileOutput(Output):
         logger.info("File cache cleaning finished")
 
     def write(self, message: LogMessage):
-        metadata = {
-            "hostname": message.fetcher.hostname,
-        }
+        filename = self._filename_template
+        for pattern, pattern_config in self._filename_patterns.items():
+            if pattern_config["type"] == "hostname":
+                data = message.fetcher.hostname
+            elif pattern_config["type"] == "timestamp":
+                data = message.timestamp.strftime(pattern_config["format"])
+            else:
+                continue
 
-        filename = self._filename_pattern.format(**metadata)
+            filename = filename.replace(pattern, data)
+
         fp = self._get_fp(filename)
         fp.write(self.output_format.process(message.as_dict))
 

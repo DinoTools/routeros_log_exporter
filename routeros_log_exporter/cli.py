@@ -22,8 +22,19 @@ def handle_signal(signal_number, frame):
 
 
 @click.command()
-@click.option("config_filename", "--config", required=True, type=click.Path())
-@click.option("-v", "verbosity", count=True)
+@click.option(
+    "config_filename",
+    "--config",
+    required=True,
+    type=click.Path(),
+    help="The config filename."
+)
+@click.option(
+    "verbosity",
+    "-v",
+    count=True,
+    help="Specify the verbosity. Use multiple times to increase the log level."
+)
 def cli(config_filename, verbosity):
     global g_exporter
     log_handler = None

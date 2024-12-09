@@ -21,9 +21,9 @@ classifiers = [
 ]
 keywords = ["RouterOS", "MikroTik", "logging", "exporter"]
 dependencies = [
-    "Click",
-    "librouteros",
-    "pyyaml"
+    "Click >= 8.0.0",
+    "librouteros >= 3.0.0",
+    "pyyaml >= 6.0"
 ]
 requires-python = ">=3.8"
 

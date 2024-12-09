@@ -1,5 +1,65 @@
 # SPDX-FileCopyrightText: PhiBo DinoTools (2024)
 # SPDX-License-Identifier: GPL-3.0-or-later
+"""
+The fetcher connects to a RouterOS device and uses the ```/log/print``` command to
+collect the log messages from the stream. The messages are not processes by the
+fetcher. One should use one or more output plugins to dump the logs.
+
+```yaml
+devices:
+  - hostname: 192.168.0.1
+    username: logger
+    password: secure_password
+    outputs:
+      # The output has to be defined
+      - log_file
+
+  - hostname: 1.2.3.4
+    username: admin
+    password: secure_password
+    ssl: yes
+    outputs:
+      # The output has to be defined
+      - log_file
+```
+
+# Config
+
+hostname (Default: localhost)
+: The hostname or the IP address of the device to connect to
+
+username (Default: admin)
+: The username of a user that can access the log stream. We recommend not use the admin
+  user and create a dedicated user to fetch the logs. We also recommend to limit the
+  access to specified source IPs.
+
+password
+: A secure password
+
+port (Default: not set)
+: If not set the port is 8728 if ```ssl: false``` and 8729 if ```ssl: true```
+
+ssl (Default: true)
+: Use SSL/TLS to connect to the device. It is highly recommended to not disable this feature.
+
+ssl_force_no_certificate (Default: false)
+: Use SSL/TLS encryption but without certificate.
+
+ssl_verify (Default: true)
+: Verify the provided certificate
+: Warning: This will not work if ```ssl_force_no_certificate: true```
+
+ssl_verify_hostname (Default: true)
+: Verify the hostname provided.
+: Warning: This will not work if ```ssl_force_no_certificate: true```
+
+ssl_cafile (Default: not set use CA from system)
+: Set a ca file to use
+
+ssl_capath  (Default: not set use CA from system)
+: Set a path to ca files to use
+
+"""
 
 import logging
 from datetime import datetime, timezone

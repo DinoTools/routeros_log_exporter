@@ -31,11 +31,10 @@ MikroTik RouterOS log exporter
   </a>
 </p>
 
-<Warning>
-# Proof of Concept
-
-This project is in an very early stage of development. Don't use it in production.
-</Warning>
+> [!WARNING]
+> **Proof of Concept**
+>
+> This project is in an very early stage of development. Don't use it in production.
 
 The Exporter connects to [MikroTik](https://mikrotik.com/) RouterOS devices via API and connects to the log stream to export the logs in realtime.
 
@@ -46,6 +45,7 @@ Requirements
 - Python Packages
     - [Click](https://pypi.org/project/click/)
     - [librouteros](https://pypi.org/project/librouteros/)
+    - [pyyaml](https://pypi.org/project/PyYAML/)
 
 Installation
 ------------

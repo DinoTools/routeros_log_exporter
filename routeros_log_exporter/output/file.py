@@ -1,5 +1,43 @@
 # SPDX-FileCopyrightText: PhiBo DinoTools (2024)
 # SPDX-License-Identifier: GPL-3.0-or-later
+"""
+This plugin can writes the log messages to a file.
+
+```yaml
+outputs:
+  log_file:
+    type: file
+    # Format of the log messages
+    format: json
+    # The config of this output plugin
+    file_config:
+      # The logging directory
+      dir: "./logs"
+      # The logging filename
+      filename: "{{hostname}}-{{timestamp:%Y-%m-%d}}.json"
+```
+
+## Filename patterns
+
+hostname
+
+: The hostname value from the config file
+
+timestamp
+
+: The timestamp when the log message has been received.
+  It has an additional parameter to specify the format.
+  It uses the strftime syntax.
+
+## Signals
+
+SIGHUP
+
+: This plugin handles the SIGHUP signal. If the signal is received it closes all file
+  handles and reopens them if needed. This is useful if you want to use it with a
+  tool like logrotate.
+"""
+
 
 from datetime import datetime
 import logging

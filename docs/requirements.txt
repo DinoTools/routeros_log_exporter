@@ -4,3 +4,4 @@
 mkdocs
 mkdocs-click
 mkdocs-material
+mkdocstrings[python] >= 0.18

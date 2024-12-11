@@ -69,6 +69,7 @@ from typing import Any, Dict, List, Optional, Set
 from queue import Queue
 
 from librouteros import connect
+from librouteros.exceptions import ConnectionClosed
 
 from .exception import ConfigError
 from .output import Output
@@ -191,12 +192,16 @@ class LogFetcher(Thread):
                 "follow-only": "",
             }
         )
-        for message in log_stream:
-            if self._should_terminate:
-                return
-            if message.get(".dead") is True:
-                continue
-            self._message_queue.put(LogMessage(fetcher=self, message=message))
+        try:
+            for message in log_stream:
+                if self._should_terminate:
+                    return
+                if message.get(".dead") is True:
+                    continue
+                self._message_queue.put(LogMessage(fetcher=self, message=message))
+        except ConnectionClosed as e:
+            logger.error(f"Connection to device '{self.hostname}' closed: {str(e)}")
+            self.disconnect()
 
     @property
     def api(self) -> RouterOSApi:
@@ -228,6 +233,12 @@ class LogFetcher(Thread):
         )
         logger.info("Connected")
         return self._api
+
+    def disconnect(self):
+        if not self._api:
+            return
+        self._api.close()
+        self._api = None
 
     def handle_signal(self, signal_number):
         pass
